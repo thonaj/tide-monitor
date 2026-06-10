@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/TideMonitor.Api/TideMonitor.Api.csproj" />
+    <Project Path="backend/TideMonitor.Core/TideMonitor.Core.csproj" />
+    <Project Path="backend/TideMonitor.Infrastructure/TideMonitor.Infrastructure.csproj" />
+  </Folder>
+</Solution>

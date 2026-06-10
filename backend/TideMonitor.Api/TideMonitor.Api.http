@@ -1,0 +1,6 @@
+@TideMonitor.Api_HostAddress = http://localhost:5145
+
+GET {{TideMonitor.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
