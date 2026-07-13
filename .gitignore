@@ -32,3 +32,9 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Azure
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
