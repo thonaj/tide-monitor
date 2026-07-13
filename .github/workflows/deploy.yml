@@ -55,7 +55,9 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Login to ACR
-        run: az acr login --name ${{ vars.ACR_NAME }}
+        run: |
+          echo "ACR_NAME value: ${{ vars.ACR_NAME }}"
+          az acr login --name ${{ vars.ACR_NAME }}
 
       - name: Build and push backend
         run: |
