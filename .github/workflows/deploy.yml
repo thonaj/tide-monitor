@@ -34,12 +34,19 @@ jobs:
             echo "Resource group ${{ env.AZURE_RESOURCE_GROUP }} already exists"
           fi
 
-      - name: Deploy Infrastructure
+      - name: Deploy Dev Infrastructure
         run: |
           az deployment group create \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/main.bicep \
-            --parameters infra/${{ github.ref_name == 'master' && 'prod' || 'dev' }}.parameters.json
+            --parameters infra/dev.parameters.json
+
+      - name: Deploy Prod Infrastructure
+        run: |
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file infra/main.bicep \
+            --parameters infra/prod.parameters.json
 
   build:
     needs: infrastructure
