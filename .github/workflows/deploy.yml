@@ -55,17 +55,17 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Login to ACR
-        run: az acr login --name ${{ vars.ACR_NAME }}
+        run: az acr login --name ${{ secrets.ACR_NAME }}
 
       - name: Build and push backend
         run: |
-          docker build -t ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} -f backend/Dockerfile .
-          docker push ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }}
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} -f backend/Dockerfile .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }}
 
       - name: Build and push frontend
         run: |
-          docker build -t ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }} -f frontend/Dockerfile .
-          docker push ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }} -f frontend/Dockerfile .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
 
   deploy-dev:
     needs: build
@@ -88,9 +88,9 @@ jobs:
             --template-file infra/app.bicep \
             --parameters \
               environmentName=tide-monitor-dev \
-              acrName=${{ vars.ACR_NAME }} \
-              backendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
-              frontendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+              acrName=${{ secrets.ACR_NAME }} \
+              backendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
+              frontendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
 
   deploy-prod:
     needs: deploy-dev
@@ -113,6 +113,6 @@ jobs:
             --template-file infra/app.bicep \
             --parameters \
               environmentName=tide-monitor-prod \
-              acrName=${{ vars.ACR_NAME }} \
-              backendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
-              frontendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+              acrName=${{ secrets.ACR_NAME }} \
+              backendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
+              frontendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
