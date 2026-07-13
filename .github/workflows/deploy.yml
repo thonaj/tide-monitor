@@ -1,0 +1,108 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AZURE_RESOURCE_GROUP: tide-monitor-rg
+
+jobs:
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Resource Group if not exists
+        run: |
+          if ! az group show --name ${{ env.AZURE_RESOURCE_GROUP }} --output none 2>/dev/null; then
+            echo "Creating resource group ${{ env.AZURE_RESOURCE_GROUP }}..."
+            az group create --name ${{ env.AZURE_RESOURCE_GROUP }} --location eastus
+          else
+            echo "Resource group ${{ env.AZURE_RESOURCE_GROUP }} already exists"
+          fi
+
+      - name: Deploy Infrastructure
+        run: |
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file infra/main.bicep \
+            --parameters infra/${{ github.ref_name == 'main' && 'prod' || 'dev' }}.parameters.json
+
+  build:
+    needs: infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to ACR
+        run: az acr login --name ${{ vars.ACR_NAME }}
+
+      - name: Build and push backend
+        run: |
+          docker build -t ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} -f backend/Dockerfile .
+          docker push ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }}
+
+      - name: Build and push frontend
+        run: |
+          docker build -t ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }} -f frontend/Dockerfile .
+          docker push ${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+
+  deploy-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Apps
+        run: |
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file infra/app.bicep \
+            --parameters \
+              environmentName=tide-monitor-dev \
+              acrName=${{ vars.ACR_NAME }} \
+              backendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
+              frontendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+
+  deploy-prod:
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Apps
+        run: |
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file infra/app.bicep \
+            --parameters \
+              environmentName=tide-monitor-prod \
+              acrName=${{ vars.ACR_NAME }} \
+              backendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
+              frontendImage=${{ vars.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}

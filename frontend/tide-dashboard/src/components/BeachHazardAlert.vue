@@ -68,11 +68,6 @@ function formatDate(dateStr: string | null): string {
   })
 }
 
-function truncateDescription(text: string, maxLength = 200): string {
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength) + '...'
-}
-
 const expandedHazardIds = ref<string[]>([])
 
 function toggleExpand(id: string) {

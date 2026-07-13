@@ -27,23 +27,8 @@ function formatTime(dateStr: string): string {
   })
 }
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
 const chartData = computed(() => {
-  // Group predictions by day for better labels
-  const labels = props.predictions.map((p) => {
-    const time = formatTime(p.time)
-    const date = formatDate(p.time)
-    // Show date on first label of each day
-    return time
-  })
+  const labels = props.predictions.map((p) => formatTime(p.time))
 
   return {
     labels,
@@ -133,50 +118,6 @@ const chartOptions = computed(() => ({
     },
   },
 }))
-
-// Add annotations for high/low tide markers
-const chartPlugins = computed(() => {
-  const highTideAnnotations = props.predictions
-    .filter((p) => p.event === 'HighTide')
-    .map((p, i) => ({
-      type: 'point' as const,
-      xValue: formatTime(p.time),
-      yValue: p.waterLevel,
-      backgroundColor: '#059669',
-      borderColor: '#059669',
-      radius: 5,
-      label: {
-        display: true,
-        content: 'H',
-        position: 'top' as const,
-        font: { weight: 'bold' as const, size: 10 },
-        color: '#059669',
-      },
-    }))
-
-  const lowTideAnnotations = props.predictions
-    .filter((p) => p.event === 'LowTide')
-    .map((p, i) => ({
-      type: 'point' as const,
-      xValue: formatTime(p.time),
-      yValue: p.waterLevel,
-      backgroundColor: '#dc2626',
-      borderColor: '#dc2626',
-      radius: 5,
-      label: {
-        display: true,
-        content: 'L',
-        position: 'bottom' as const,
-        font: { weight: 'bold' as const, size: 10 },
-        color: '#dc2626',
-      },
-    }))
-
-  return {
-    id: 'tideAnnotations',
-    afterDraw: () => {}, // Placeholder - annotations handled via data points
-  }
-})
 </script>
 
 <template>
