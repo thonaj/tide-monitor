@@ -106,8 +106,6 @@ jobs:
           ACR_USERNAME: ${{ secrets.DEV_ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.DEV_ACR_PASSWORD }}
         run: |
-          echo "Username length: ${#ACR_USERNAME}"
-          echo "Password length: ${#ACR_PASSWORD}"
           az deployment group create \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/app.bicep \
