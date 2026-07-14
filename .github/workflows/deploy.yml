@@ -96,6 +96,8 @@ jobs:
             --parameters \
               environmentName=tide-monitor-dev \
               acrName=${{ secrets.ACR_NAME }} \
+              acrUsername=${{ secrets.ACR_USERNAME }} \
+              acrPassword=${{ secrets.ACR_PASSWORD }} \
               backendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
               frontendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
 
@@ -121,5 +123,7 @@ jobs:
             --parameters \
               environmentName=tide-monitor-prod \
               acrName=${{ secrets.ACR_NAME }} \
+              acrUsername=${{ secrets.ACR_USERNAME }} \
+              acrPassword=${{ secrets.ACR_PASSWORD }} \
               backendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
               frontendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
