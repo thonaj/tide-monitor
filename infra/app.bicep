@@ -18,7 +18,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existin
 var acrLoginServer = acr.properties.loginServer
 
 resource backend 'Microsoft.App/containerApps@2024-03-01' = {
-  name: 'tide-monitor-backend'
+  name: 'tide-monitor-${environmentName}-backend'
   location: location
   properties: {
     environmentId: caEnvironment.id
@@ -72,7 +72,7 @@ resource backend 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 resource frontend 'Microsoft.App/containerApps@2024-03-01' = {
-  name: 'tide-monitor-frontend'
+  name: 'tide-monitor-${environmentName}-frontend'
   location: location
   properties: {
     environmentId: caEnvironment.id
