@@ -107,7 +107,7 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/app.bicep \
             --parameters \
-              environmentName=dev \
+              environmentName=tide-monitor-dev \
               acrName=tideacrdev \
               acrUsername=${{ secrets.DEV_ACR_USERNAME }} \
               acrPassword=${{ secrets.DEV_ACR_PASSWORD }} \
@@ -134,7 +134,7 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/app.bicep \
             --parameters \
-              environmentName=prod \
+              environmentName=tide-monitor-prod \
               acrName=tideacrprod \
               acrUsername=${{ secrets.PROD_ACR_USERNAME }} \
               acrPassword=${{ secrets.PROD_ACR_PASSWORD }} \
