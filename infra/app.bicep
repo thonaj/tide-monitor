@@ -107,6 +107,7 @@ resource frontend 'Microsoft.App/containerApps@2024-03-01' = {
               value: '${environmentName}-backend'
             }
           ]
+        }
       ]
       scale: {
         minReplicas: 0
