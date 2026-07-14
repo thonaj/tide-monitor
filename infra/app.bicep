@@ -104,7 +104,7 @@ resource frontend 'Microsoft.App/containerApps@2024-03-01' = {
           env: [
             {
               name: 'BACKEND_HOST'
-              value: '${environmentName}-backend'
+              value: '${environmentName}-backend.${caEnvironment.properties.defaultDomain}'
             }
           ]
         }
