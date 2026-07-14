@@ -1,6 +1,9 @@
 param location string = resourceGroup().location
 param environmentName string
 param acrName string
+param acrUsername string
+@secure()
+param acrPassword string
 param backendImage string
 param frontendImage string
 
@@ -15,11 +18,8 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existin
 var acrLoginServer = acr.properties.loginServer
 
 resource backend 'Microsoft.App/containerApps@2024-03-01' = {
-  name: 'tide-monitor-backend'
+  name: 'tide-monitor-${environmentName}-backend'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
   properties: {
     environmentId: caEnvironment.id
     configuration: {
@@ -31,7 +31,14 @@ resource backend 'Microsoft.App/containerApps@2024-03-01' = {
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          username: acrUsername
+          passwordSecretRef: 'acr-password'
+        }
+      ]
+      secrets: [
+        {
+          name: 'acr-password'
+          value: acrPassword
         }
       ]
     }
@@ -65,11 +72,8 @@ resource backend 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 resource frontend 'Microsoft.App/containerApps@2024-03-01' = {
-  name: 'tide-monitor-frontend'
+  name: 'tide-monitor-${environmentName}-frontend'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
   properties: {
     environmentId: caEnvironment.id
     configuration: {
@@ -81,7 +85,14 @@ resource frontend 'Microsoft.App/containerApps@2024-03-01' = {
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          username: acrUsername
+          passwordSecretRef: 'acr-password'
+        }
+      ]
+      secrets: [
+        {
+          name: 'acr-password'
+          value: acrPassword
         }
       ]
     }

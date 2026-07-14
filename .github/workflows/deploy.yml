@@ -61,18 +61,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Login to ACR
-        run: az acr login --name ${{ secrets.ACR_NAME }}
+      - name: Login to Dev ACR
+        run: az acr login --name tideacrdev
 
-      - name: Build and push backend
+      - name: Build and push backend to Dev ACR
         run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} -f backend/Dockerfile .
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }}
+          docker build -t tideacrdev.azurecr.io/tide-monitor-backend:${{ github.sha }} -f backend/Dockerfile .
+          docker push tideacrdev.azurecr.io/tide-monitor-backend:${{ github.sha }}
 
-      - name: Build and push frontend
+      - name: Build and push frontend to Dev ACR
         run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }} -f frontend/Dockerfile .
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+          docker build -t tideacrdev.azurecr.io/tide-monitor-frontend:${{ github.sha }} -f frontend/Dockerfile .
+          docker push tideacrdev.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+
+      - name: Login to Prod ACR
+        run: az acr login --name tideacrprod
+
+      - name: Build and push backend to Prod ACR
+        run: |
+          docker build -t tideacrprod.azurecr.io/tide-monitor-backend:${{ github.sha }} -f backend/Dockerfile .
+          docker push tideacrprod.azurecr.io/tide-monitor-backend:${{ github.sha }}
+
+      - name: Build and push frontend to Prod ACR
+        run: |
+          docker build -t tideacrprod.azurecr.io/tide-monitor-frontend:${{ github.sha }} -f frontend/Dockerfile .
+          docker push tideacrprod.azurecr.io/tide-monitor-frontend:${{ github.sha }}
 
   deploy-dev:
     needs: build
@@ -94,10 +107,12 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/app.bicep \
             --parameters \
-              environmentName=tide-monitor-dev \
-              acrName=${{ secrets.ACR_NAME }} \
-              backendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
-              frontendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+              environmentName=dev \
+              acrName=tideacrdev \
+              acrUsername=${{ secrets.DEV_ACR_USERNAME }} \
+              acrPassword=${{ secrets.DEV_ACR_PASSWORD }} \
+              backendImage=tideacrdev.azurecr.io/tide-monitor-backend:${{ github.sha }} \
+              frontendImage=tideacrdev.azurecr.io/tide-monitor-frontend:${{ github.sha }}
 
   deploy-prod:
     needs: deploy-dev
@@ -119,7 +134,9 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file infra/app.bicep \
             --parameters \
-              environmentName=tide-monitor-prod \
-              acrName=${{ secrets.ACR_NAME }} \
-              backendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-backend:${{ github.sha }} \
-              frontendImage=${{ secrets.ACR_NAME }}.azurecr.io/tide-monitor-frontend:${{ github.sha }}
+              environmentName=prod \
+              acrName=tideacrprod \
+              acrUsername=${{ secrets.PROD_ACR_USERNAME }} \
+              acrPassword=${{ secrets.PROD_ACR_PASSWORD }} \
+              backendImage=tideacrprod.azurecr.io/tide-monitor-backend:${{ github.sha }} \
+              frontendImage=tideacrprod.azurecr.io/tide-monitor-frontend:${{ github.sha }}
