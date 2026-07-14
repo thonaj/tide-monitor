@@ -11,11 +11,7 @@ resource caEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing =
   name: environmentName
 }
 
-resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing = {
-  name: acrName
-}
-
-var acrLoginServer = acr.properties.loginServer
+var acrLoginServer = '${acrName}.azurecr.io'
 
 resource backend 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${environmentName}-backend'
