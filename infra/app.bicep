@@ -101,7 +101,12 @@ resource frontend 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: any('0.25')
             memory: '0.5Gi'
           }
-        }
+          env: [
+            {
+              name: 'BACKEND_HOST'
+              value: '${environmentName}-backend'
+            }
+          ]
       ]
       scale: {
         minReplicas: 0

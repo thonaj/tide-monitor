@@ -10,5 +10,7 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY frontend/tide-dashboard/nginx.conf /etc/nginx/conf.d/default.conf
+COPY frontend/tide-dashboard/nginx-entrypoint.sh /nginx-entrypoint.sh
+RUN chmod +x /nginx-entrypoint.sh
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/nginx-entrypoint.sh"]
