@@ -102,6 +102,9 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy Apps
+        env:
+          ACR_USERNAME: ${{ secrets.DEV_ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.DEV_ACR_PASSWORD }}
         run: |
           az deployment group create \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
@@ -109,8 +112,8 @@ jobs:
             --parameters \
               environmentName=tide-monitor-dev \
               acrName=tideacrdev \
-              acrUsername=${{ secrets.DEV_ACR_USERNAME }} \
-              acrPassword=${{ secrets.DEV_ACR_PASSWORD }} \
+              acrUsername="$ACR_USERNAME" \
+              acrPassword="$ACR_PASSWORD" \
               backendImage=tideacrdev.azurecr.io/tide-monitor-backend:${{ github.sha }} \
               frontendImage=tideacrdev.azurecr.io/tide-monitor-frontend:${{ github.sha }}
 
@@ -129,6 +132,9 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy Apps
+        env:
+          ACR_USERNAME: ${{ secrets.PROD_ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.PROD_ACR_PASSWORD }}
         run: |
           az deployment group create \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
@@ -136,7 +142,7 @@ jobs:
             --parameters \
               environmentName=tide-monitor-prod \
               acrName=tideacrprod \
-              acrUsername=${{ secrets.PROD_ACR_USERNAME }} \
-              acrPassword=${{ secrets.PROD_ACR_PASSWORD }} \
+              acrUsername="$ACR_USERNAME" \
+              acrPassword="$ACR_PASSWORD" \
               backendImage=tideacrprod.azurecr.io/tide-monitor-backend:${{ github.sha }} \
               frontendImage=tideacrprod.azurecr.io/tide-monitor-frontend:${{ github.sha }}
